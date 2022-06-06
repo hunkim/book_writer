@@ -1,0 +1,5 @@
+__pycache__
+.book_venv
+.env
+.firestore_key.json
+log.json

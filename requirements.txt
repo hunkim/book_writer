@@ -1,0 +1,10 @@
+python-dotenv
+firebase_admin
+streamlit
+click<=8.0.4
+httpx-oauth
+ecs-logging
+openai
+jina
+docarray[common]>=0.13.5
+git+https://github.com/hunkim/streamlit-google-oauth
