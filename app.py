@@ -7,6 +7,8 @@ import streamlit_google_oauth as oauth
 import firestore_db as fdb
 import gpt3
 import dalle
+import textwrap
+
 
 load_dotenv()
 client_id = os.environ["GOOGLE_CLIENT_ID"]
@@ -82,6 +84,7 @@ def main(user_id=None, user_email=None):
         line = st.text_input(
             "Wite the first sentnece (feel free to midify)",
             value=st.session_state.first_line,
+            max_chars=256,
         )
     else:
         if st.session_state.generated_line is None:
@@ -89,23 +92,34 @@ def main(user_id=None, user_email=None):
                 st.session_state.generated_line = gpt3.get_next_line(
                     list=st.session_state.blist
                 )
-
-        if st.button("✍️ Regenerate Sentnece"):
+        gpt_button_holder = st.empty()
+        gpt_button = gpt_button_holder.button("✍️ Regenerate Sentnece", key='1')
+        if gpt_button:
+            gpt_button_holder.button("✍️ Regenerate Sentnece", disabled=True, key='2')
             with st.spinner("Regenerating GPT lines (about 2 sec)..."):
                 st.session_state.generated_line = gpt3.get_next_line(
                     list=st.session_state.blist
                 )
+            gpt_button_holder.button("✍️ Regenerate Sentnece", disabled=False, key='3')
 
-        line = st.text_input(
+
+        long_line = st.text_input(
             "Next Sentnece (Feel free to regenerate or edit)",
             value=st.session_state.generated_line,
+            max_chars=256,
         )
 
     img = None
+    line = None
+
     if st.button("🎨 (Re)generate Dalle Illustration"):
-        if len(line) > 0:
+        if line and len(line) > 0:
+            # Limit the max_tokens parameter to 250 per completion.
+            short_line = textwrap.wrap(long_line, 50, break_long_words=False)[0]
+            line = textwrap.wrap(long_line, 256, break_long_words=False)[0]
+
             with st.spinner(
-                f"Generating illustration for '{line[:50]}...' (about 20 sec)"
+                f"Generating illustration for '{short_line} ...' (about 20 sec)"
             ):
                 img = dalle.get_images_from_dalle(prompt=line)
                 st.image(img)
@@ -113,7 +127,7 @@ def main(user_id=None, user_email=None):
         else:
             st.error("Please write sentence first")
 
-    if img:
+    if img and line:
         st.button(
             "💾 Save this sentence and Write next sentence",
             on_click=add_sentence,
@@ -135,7 +149,7 @@ if __name__ == "__main__":
     st.write(
         f"""
         ## 📖 AI Book Writing with GPT3 & Dalle-mini
-        Just put the first sentnece. *DALLE will generate illustrations and GPT3 will write next sentences.* 
+        Just put the first sentence. *DALLE will generate illustrations and GPT3 will write the next sentences.* 
         Feel free to modify generated sentences and create **your own book**!
         """
     )

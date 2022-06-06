@@ -43,7 +43,14 @@ def get_next_line(prompt=None, list=None, engine="text-babbage-001"):
         max_tokens=500,
     )
 
-    return results["choices"][0]["text"]
+    long_line = ""
+    
+    if 'choices' in results and len(results['choices']) > 0 and 'text' in results['choices'][0]:
+        long_line = results["choices"][0]["text"]
+
+    # split long lines with \n and ###
+    lines = long_line.split("\n")
+    return lines[0]
 
 
 if __name__ == "__main__":
