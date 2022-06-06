@@ -113,7 +113,7 @@ def main(user_id=None, user_email=None):
     line = None
 
     if st.button("🎨 (Re)generate Dalle Illustration"):
-        if line and len(line) > 0:
+        if long_line and len(long_line) > 0:
             # Limit the max_tokens parameter to 250 per completion.
             short_line = textwrap.wrap(long_line, 50, break_long_words=False)[0]
             line = textwrap.wrap(long_line, 256, break_long_words=False)[0]
